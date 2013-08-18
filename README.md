@@ -1,11 +1,11 @@
 所為何來
 =
 做為一公開的網頁伺服器，連入的安全性是要謹慎的。  
-本文將針對登入帳號、SSH 及 IP 入侵規則進行設定。
+本文將針對登入帳號、SSH 及 IP 入侵規則進行補強。
 
 適用環境
 =
-Ubuntu Server 12.04
+Ubuntu Server 12.04  
 fail2ban 0.8.10
 
 安裝方式
@@ -16,7 +16,7 @@ fail2ban 0.8.10
 ```bash
 ssh root@10.10.10.10
 ```
-如出現類似訊息，仍請回答 yes：
+如出現類似訊息，仍請回答 <code>yes</code>：
 ```text
 The authenticity of host '10.10.10.20 (10.10.10.20)' can't be established.
 ECDSA key fingerprint is 11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd:ee:ff.
@@ -35,7 +35,7 @@ passwd
 ```bash
 adduser web.admin
 ```
-設定過程中，請雙次輸入密碼；其餘之電話、Email 資訊，可自行填入或留白。
+設定過程中，請雙次輸入密碼；其餘之電話、Email 資訊，可自行填入或留白。  
 需要注意的是，所新增的帳號並未擁有 sudo 權限，所以輸入以下指令來編輯權限設定：
 ```bash
 visudo
@@ -45,31 +45,31 @@ visudo
 # User privilege specification
 root    ALL=(ALL:ALL) ALL
 ```
-於其下一行添加：
+於其下一行添加：  
+(<code>web.admin</code> 為本文示範帳號)
 ```text
 web.admin    ALL=(ALL:ALL) ALL
 ```
-存檔後退出編輯 (cntrl x, then yes)，如此，<code>web.admin</code> 即有使用 sudo 的權限。
+存檔後退出編輯，如此，此帳號即有使用 sudo 的權限。
 
 ###修改 SSH 的設定
 開啟 SSH 的設定檔：
 ```bash
 nano /etc/ssh/sshd_config
 ```
-找到以下字句，並修改之：
+請分別找到以下二行：
 ```text
-Port 1010
-~~~
-PermitRootLogin no
+Port 22
+PermitRootLogin yes
 ```
-Port 預設值為 22，為防止惡意連線，請更換為 1025 ～ 65536 間的數字，並請不要忘記 (本文以 <code>1010</code> 做為示範)。  
-PermitRootLogin 為設定 root 可否登入的選項，預設為 yes，本文建議更改為 no。  
+Port 預設值為 22，為防止惡意連線，請更換為 1025 ～ 65536 間的數字，並請不要忘記你的設定 (本文以 <code>1010</code> 做為示範)。  
+PermitRootLogin 為設定 root 可否登入的選項，預設為 <code>yes</code>，本文建議更改為 <code>no</code>。  
 於文件最後，可添加以下二句，：
 ```text
 UseDNS no
 AllowUsers web.admin
 ```
-UseDNS 設定為 no 後，可使伺服器省略過 DNS 反向查詢，加快 SSH 登入速度；  
+UseDNS 設定為 <code>no</code> 後，可使伺服器省略過 DNS 反向查詢，加快 SSH 登入速度；  
 AllowUsers 則用於限定可 SSH 登入之帳號 (本文限定 <code>web.admin</code> 為唯一登入帳號)。
   
 存檔後退出編輯，再重新啟動 SSH：
