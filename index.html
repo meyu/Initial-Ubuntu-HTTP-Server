@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Initial-ubuntu-http-server : 網頁伺服器的前置作業" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Initial-ubuntu-http-server</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/meyu/Initial-Ubuntu-HTTP-Server">View on GitHub</a>
+
+          <h1 id="project_title">Initial-ubuntu-http-server</h1>
+          <h2 id="project_tagline">網頁伺服器的前置作業</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/meyu/Initial-Ubuntu-HTTP-Server/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/meyu/Initial-Ubuntu-HTTP-Server/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="%E6%89%80%E7%82%BA%E4%BD%95%E4%BE%86" class="anchor" href="#%E6%89%80%E7%82%BA%E4%BD%95%E4%BE%86"><span class="octicon octicon-link"></span></a>所為何來</h1>
+
+<p>做為一公開的網頁伺服器，連入的安全性是要謹慎的。<br>
+本文將針對登入帳號、SSH 及 IP 入侵規則進行補強。</p>
+
+<h1>
+<a name="%E9%81%A9%E7%94%A8%E7%92%B0%E5%A2%83" class="anchor" href="#%E9%81%A9%E7%94%A8%E7%92%B0%E5%A2%83"><span class="octicon octicon-link"></span></a>適用環境</h1>
+
+<p>Ubuntu Server 12.04<br>
+fail2ban 0.8.10</p>
+
+<h1>
+<a name="%E5%AE%89%E8%A3%9D%E6%96%B9%E5%BC%8F" class="anchor" href="#%E5%AE%89%E8%A3%9D%E6%96%B9%E5%BC%8F"><span class="octicon octicon-link"></span></a>安裝方式</h1>
+
+<h3>
+<a name="%E7%99%BB%E5%85%A5" class="anchor" href="#%E7%99%BB%E5%85%A5"><span class="octicon octicon-link"></span></a>登入</h3>
+
+<p>請從本機以 root 身份登入，或從遠端以 SSH 協定登入：<br>
+(本文以伺服器的 IP 為 <code>10.10.10.10</code> 做示範，請自行修改)</p>
+
+<div class="highlight"><pre>ssh root@10.10.10.10
+</pre></div>
+
+<p>如出現類似訊息，仍請回答 <code>yes</code>：</p>
+
+<div class="highlight"><pre>The authenticity of host '10.10.10.20 (10.10.10.20)' can't be established.
+ECDSA key fingerprint is 11:22:33:44:55:66:77:88:99:00:aa:bb:cc:dd:ee:ff.
+Are you sure you want to continue connecting (yes/no)?
+</pre></div>
+
+<h3>
+<a name="%E6%9B%B4%E6%94%B9-root-%E7%9A%84%E5%AF%86%E7%A2%BC" class="anchor" href="#%E6%9B%B4%E6%94%B9-root-%E7%9A%84%E5%AF%86%E7%A2%BC"><span class="octicon octicon-link"></span></a>更改 root 的密碼</h3>
+
+<p>如 root 的密碼為他方給予，或自己想換組密碼，可於此時輸入：</p>
+
+<div class="highlight"><pre>passwd
+</pre></div>
+
+<h3>
+<a name="%E6%96%B0%E5%A2%9E%E4%BD%BF%E7%94%A8%E8%80%85" class="anchor" href="#%E6%96%B0%E5%A2%9E%E4%BD%BF%E7%94%A8%E8%80%85"><span class="octicon octicon-link"></span></a>新增使用者</h3>
+
+<p>如沒有 root 之外的使用者，或想新增一網站管理帳號：<br>
+(本文以 <code>web.admin</code> 做為示範帳號)</p>
+
+<div class="highlight"><pre>adduser web.admin
+</pre></div>
+
+<p>設定過程中，請雙次輸入密碼；其餘之電話、Email 資訊，可自行填入或留白。<br>
+需要注意的是，所新增的帳號並未擁有 sudo 權限，所以輸入以下指令來編輯權限設定：</p>
+
+<div class="highlight"><pre>visudo
+</pre></div>
+
+<p>找到文中以下字句處：</p>
+
+<div class="highlight"><pre># User privilege specification
+root    ALL=(ALL:ALL) ALL
+</pre></div>
+
+<p>於其下一行添加：<br>
+(<code>web.admin</code> 為本文示範帳號)</p>
+
+<div class="highlight"><pre>web.admin    ALL=(ALL:ALL) ALL
+</pre></div>
+
+<p>存檔後退出編輯，如此，此帳號即有使用 sudo 的權限。</p>
+
+<h3>
+<a name="%E4%BF%AE%E6%94%B9-ssh-%E7%9A%84%E8%A8%AD%E5%AE%9A" class="anchor" href="#%E4%BF%AE%E6%94%B9-ssh-%E7%9A%84%E8%A8%AD%E5%AE%9A"><span class="octicon octicon-link"></span></a>修改 SSH 的設定</h3>
+
+<p>開啟 SSH 的設定檔：</p>
+
+<div class="highlight"><pre>nano /etc/ssh/sshd_config
+</pre></div>
+
+<p>請分別找到以下二行：</p>
+
+<div class="highlight"><pre>Port 22
+PermitRootLogin yes
+</pre></div>
+
+<p>Port 預設值為 22，為防止惡意連線，請更換為 1025 ～ 65536 間的數字，並請不要忘記你的設定 (本文以 <code>1010</code> 做為示範)。<br>
+PermitRootLogin 為設定 root 可否登入的選項，預設為 <code>yes</code>，本文建議更改為 <code>no</code>。<br>
+於文件最後，可添加以下二句，：</p>
+
+<div class="highlight"><pre>UseDNS no
+AllowUsers web.admin
+</pre></div>
+
+<p>UseDNS 設定為 <code>no</code> 後，可使伺服器省略過 DNS 反向查詢，加快 SSH 登入速度；<br>
+AllowUsers 則用於限定可 SSH 登入之帳號 (本文限定 <code>web.admin</code> 為唯一登入帳號)。</p>
+
+<p>存檔後退出編輯，再重新啟動 SSH：</p>
+
+<div class="highlight"><pre>reload ssh
+</pre></div>
+
+<h3>
+<a name="%E6%B8%AC%E8%A9%A6" class="anchor" href="#%E6%B8%AC%E8%A9%A6"><span class="octicon octicon-link"></span></a>測試</h3>
+
+<p>請先不要登出，保持連線，並另開一終端機介面，輸入以下指令：
+(<code>web.admin</code> 及 <code>10.10.10.10</code> 則皆為本文示範之帳號及伺服器 IP)</p>
+
+<div class="highlight"><pre>ssh -p 1010 web.admin@10.10.10.10
+</pre></div>
+
+<p>其中，-p 參數代表要指定連線的 Port，<code>1010</code> 即本文先前所指定的 Port 值。<br>
+若可成功登入，代表設定無誤，即可將原來 root 的連線登出。  </p>
+
+<p>日後也請使用所指定的帳號與 Port 進行登入及操作。</p>
+
+<h3>
+<a name="%E5%AE%89%E8%A3%9D-fail2ban-%E9%98%B2%E5%85%A5%E4%BE%B5%E5%A5%97%E4%BB%B6" class="anchor" href="#%E5%AE%89%E8%A3%9D-fail2ban-%E9%98%B2%E5%85%A5%E4%BE%B5%E5%A5%97%E4%BB%B6"><span class="octicon octicon-link"></span></a>安裝 Fail2ban 防入侵套件</h3>
+
+<p>安裝指令：</p>
+
+<div class="highlight"><pre>sudo apt-get install fail2ban
+</pre></div>
+
+<p>製作本機設定檔，並編輯之：</p>
+
+<div class="highlight"><pre>sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local <span class="o">&amp;&amp;</span>
+sudo nano /etc/fail2ban/jail.local
+</pre></div>
+
+<p>其中，DEFAULT 段落會如下所示：</p>
+
+<div class="highlight"><pre>[DEFAULT]
+
+# "ignoreip" can be an IP address, a CIDR mask or a DNS host
+ignoreip = 127.0.0.1/8
+bantime  = 600
+maxretry = 3
+
+# "backend" specifies the backend used to get files modification. Available
+# options are "gamin", "polling" and "auto".
+# yoh: For some reason Debian shipped python-gamin didn't work as expected
+#      This issue left ToDo, so polling is default backend for now
+backend = auto
+
+#
+# Destination email address used solely for the interpolations in
+# jail.{conf,local} configuration files.
+destemail = root@localhost
+
+</pre></div>
+
+<p>段落末行的 <code>destemail = root@localhost</code> 可自行更換為自己的 Email，當 Fail2ban 有阻擋 IP 時，即會發信通知 (但先決條件是，你的伺服務要設定好 Mail Server)。<br>
+餘選項維持預設即可，有興趣者可自行研究更改。  </p>
+
+<p>SSH 的段落中：</p>
+
+<div class="highlight"><pre>[ssh]
+
+enabled  = true
+port     = ssh
+filter   = sshd
+logpath  = /var/log/auth.log
+maxretry = 6
+</pre></div>
+
+<p>請將 port 值指定為你設定 SSH 登入 Port，以本文為例，將為<code>port = 1010</code>。<br>
+存檔後退出編輯，再重新啟動 Fail2ban：</p>
+
+<div class="highlight"><pre>sudo service fail2ban restart
+</pre></div>
+
+<p>DONE.
+<br><br></p>
+
+<h1>
+<a name="%E8%A3%9C%E5%85%85%E8%AA%AA%E6%98%8E" class="anchor" href="#%E8%A3%9C%E5%85%85%E8%AA%AA%E6%98%8E"><span class="octicon octicon-link"></span></a>補充說明</h1>
+
+<p>欲查看 Fail2ban 的運作情況，可使用：</p>
+
+<div class="highlight"><pre>sudo iptables -L
+</pre></div>
+
+<h1>
+<a name="%E5%8F%83%E8%80%83%E8%B3%87%E6%BA%90" class="anchor" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%BA%90"><span class="octicon octicon-link"></span></a>參考資源</h1>
+
+<ul>
+<li><a href="https://www.digitalocean.com/community/articles/initial-server-setup-with-ubuntu-12-04">Initial Server Setup with Ubuntu 12.04 | DigitalOcean</a></li>
+<li><a href="https://www.digitalocean.com/community/articles/how-to-protect-ssh-with-fail2ban-on-ubuntu-12-04">How to Protect SSH with fail2ban on Ubuntu 12.04 | DigitalOcean</a></li>
+<li><a href="http://www.fail2ban.org/wiki/index.php/Main_Page">Fail2ban</a></li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Initial-ubuntu-http-server maintained by <a href="https://github.com/meyu">meyu</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
