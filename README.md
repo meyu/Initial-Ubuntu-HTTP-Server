@@ -35,7 +35,7 @@ passwd
 ```bash
 adduser web.admin
 ```
-設定過程中，請雙次輸入密碼；其餘之電話、Email 資訊，可自行填入或留白。  
+設定過程中，請雙次輸入密碼；其餘之姓名、電話資訊，可自行填入或留白。  
 需要注意的是，所新增的帳號並未擁有 sudo 權限，所以輸入以下指令來編輯權限設定：
 ```bash
 visudo
@@ -48,7 +48,7 @@ root    ALL=(ALL:ALL) ALL
 於其下一行添加：  
 (<code>web.admin</code> 為本文示範帳號)
 ```text
-web.admin    ALL=(ALL:ALL) ALL
+web.admin   ALL=(ALL:ALL) ALL
 ```
 存檔後退出編輯，如此，此帳號即有使用 sudo 的權限。
 
@@ -148,9 +148,18 @@ DONE.
 ```bash
 sudo iptables -L
 ```
+查看 Fail2ban 已阻擋的 IP：
+```bash
+sudo fail2ban-client status
+```
+編輯 Fail2ban 的阻擋清單：
+```bash
+sudo nano /etc/fail2ban/filter.d
+```
 
 參考資源
 =
 * [Initial Server Setup with Ubuntu 12.04 | DigitalOcean](https://www.digitalocean.com/community/articles/initial-server-setup-with-ubuntu-12-04)
 * [How to Protect SSH with fail2ban on Ubuntu 12.04 | DigitalOcean](https://www.digitalocean.com/community/articles/how-to-protect-ssh-with-fail2ban-on-ubuntu-12-04)
 * [Fail2ban](http://www.fail2ban.org/wiki/index.php/Main_Page)
+* [Fail2ban - Community Ubuntu Documentation](https://help.ubuntu.com/community/Fail2ban)
