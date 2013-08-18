@@ -79,7 +79,7 @@ Are you sure you want to continue connecting (yes/no)?
 <div class="highlight"><pre>adduser web.admin
 </pre></div>
 
-<p>設定過程中，請雙次輸入密碼；其餘之電話、Email 資訊，可自行填入或留白。<br>
+<p>設定過程中，請雙次輸入密碼；其餘之姓名、電話資訊，可自行填入或留白。<br>
 需要注意的是，所新增的帳號並未擁有 sudo 權限，所以輸入以下指令來編輯權限設定：</p>
 
 <div class="highlight"><pre>visudo
@@ -94,7 +94,7 @@ root    ALL=(ALL:ALL) ALL
 <p>於其下一行添加：<br>
 (<code>web.admin</code> 為本文示範帳號)</p>
 
-<div class="highlight"><pre>web.admin    ALL=(ALL:ALL) ALL
+<div class="highlight"><pre>web.admin   ALL=(ALL:ALL) ALL
 </pre></div>
 
 <p>存檔後退出編輯，如此，此帳號即有使用 sudo 的權限。</p>
@@ -210,6 +210,16 @@ maxretry = 6
 <div class="highlight"><pre>sudo iptables -L
 </pre></div>
 
+<p>查看 Fail2ban 已阻擋的 IP：</p>
+
+<div class="highlight"><pre>sudo fail2ban-client status
+</pre></div>
+
+<p>編輯 Fail2ban 的阻擋清單：</p>
+
+<div class="highlight"><pre>sudo nano /etc/fail2ban/filter.d
+</pre></div>
+
 <h1>
 <a name="%E5%8F%83%E8%80%83%E8%B3%87%E6%BA%90" class="anchor" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%BA%90"><span class="octicon octicon-link"></span></a>參考資源</h1>
 
@@ -217,6 +227,7 @@ maxretry = 6
 <li><a href="https://www.digitalocean.com/community/articles/initial-server-setup-with-ubuntu-12-04">Initial Server Setup with Ubuntu 12.04 | DigitalOcean</a></li>
 <li><a href="https://www.digitalocean.com/community/articles/how-to-protect-ssh-with-fail2ban-on-ubuntu-12-04">How to Protect SSH with fail2ban on Ubuntu 12.04 | DigitalOcean</a></li>
 <li><a href="http://www.fail2ban.org/wiki/index.php/Main_Page">Fail2ban</a></li>
+<li><a href="https://help.ubuntu.com/community/Fail2ban">Fail2ban - Community Ubuntu Documentation</a></li>
 </ul>
       </section>
     </div>
