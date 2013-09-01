@@ -31,9 +31,9 @@ passwd
 
 ###新增使用者
 如沒有 root 之外的使用者，或想新增一網站管理帳號：  
-(本文以 <code>web.admin</code> 做為示範帳號)
+(本文以 <code>WebAdmin</code> 做為示範帳號)
 ```bash
-adduser web.admin
+adduser WebAdmin
 ```
 設定過程中，請雙次輸入密碼；其餘之姓名、電話資訊，可自行填入或留白。  
 需要注意的是，所新增的帳號並未擁有 sudo 權限，所以輸入以下指令來編輯權限設定：
@@ -46,9 +46,9 @@ visudo
 root    ALL=(ALL:ALL) ALL
 ```
 於其下一行添加：  
-(<code>web.admin</code> 為本文示範帳號)
+(<code>WebAdmin</code> 為本文示範帳號)
 ```text
-web.admin   ALL=(ALL:ALL) ALL
+WebAdmin   ALL=(ALL:ALL) ALL
 ```
 存檔後退出編輯，如此，此帳號即有使用 sudo 的權限。
 
@@ -67,10 +67,10 @@ PermitRootLogin 為設定 root 可否登入的選項，預設為 <code>yes</code
 於文件最後，可添加以下二句，：
 ```text
 UseDNS no
-AllowUsers web.admin
+AllowUsers WebAdmin
 ```
 UseDNS 設定為 <code>no</code> 後，可使伺服器省略過 DNS 反向查詢，加快 SSH 登入速度；  
-AllowUsers 則用於限定可 SSH 登入之帳號 (本文限定 <code>web.admin</code> 為唯一登入帳號)。
+AllowUsers 則用於限定可 SSH 登入之帳號 (本文限定 <code>WebAdmin</code> 為唯一登入帳號)。
   
 存檔後退出編輯，再重新啟動 SSH：
 ```bash
@@ -79,9 +79,9 @@ reload ssh
 
 ###測試
 請先不要登出，保持連線，並另開一終端機介面，輸入以下指令：
-(<code>web.admin</code> 及 <code>10.10.10.10</code> 則皆為本文示範之帳號及伺服器 IP)
+(<code>WebAdmin</code> 及 <code>10.10.10.10</code> 則皆為本文示範之帳號及伺服器 IP)
 ```bash
-ssh -p 1010 web.admin@10.10.10.10
+ssh -p 1010 WebAdmin@10.10.10.10
 ```
 其中，-p 參數代表要指定連線的 Port，<code>1010</code> 即本文先前所指定的 Port 值。  
 若可成功登入，代表設定無誤，即可將原來 root 的連線登出。  
