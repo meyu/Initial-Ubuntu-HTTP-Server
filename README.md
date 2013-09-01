@@ -91,7 +91,7 @@ ssh -p 1010 WebAdmin@10.10.10.10
 ###安裝 Fail2ban 防入侵套件
 安裝指令：
 ```bash
-sudo apt-get install fail2ban
+sudo aptitude install fail2ban
 ```
 製作本機設定檔，並編輯之：
 ```bash
